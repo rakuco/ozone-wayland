@@ -1,0 +1,47 @@
+From 05055a992ad8595fe91eaa06cd94f5aa41da68a7 Mon Sep 17 00:00:00 2001
+From: Raphael Kubo da Costa <raphael.kubo.da.costa@intel.com>
+Date: Fri, 11 Oct 2013 15:07:10 +0300
+Subject: [PATCH 3/4] Backport Chromium commit 0a10dac (r224922).
+
+    Update SurfaceFactoryOzone namespace in aura tests helper.
+
+    This change was missed when the OZONE files were moved to gfx.
+
+    BUG=
+
+    Review URL: https://chromiumcodereview.appspot.com/24303007
+---
+ ui/aura/test/aura_test_helper.h |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/ui/aura/test/aura_test_helper.h b/ui/aura/test/aura_test_helper.h
+index e19cb6a..9973dbd 100644
+--- a/ui/aura/test/aura_test_helper.h
++++ b/ui/aura/test/aura_test_helper.h
+@@ -12,10 +12,13 @@ namespace base {
+ class MessageLoopForUI;
+ }
+ 
++namespace gfx {
++class SurfaceFactoryOzone;
++}
++
+ namespace ui {
+ class InputMethod;
+ class ScopedAnimationDurationScaleMode;
+-class SurfaceFactoryOzone;
+ }
+ 
+ namespace aura {
+@@ -66,7 +69,7 @@ class AuraTestHelper {
+   scoped_ptr<ui::ScopedAnimationDurationScaleMode> zero_duration_mode_;
+ 
+ #if defined(USE_OZONE)
+-  scoped_ptr<ui::SurfaceFactoryOzone> surface_factory_;
++  scoped_ptr<gfx::SurfaceFactoryOzone> surface_factory_;
+ #endif
+ 
+   DISALLOW_COPY_AND_ASSIGN(AuraTestHelper);
+-- 
+1.7.9.5
+

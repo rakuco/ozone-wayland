@@ -1,0 +1,102 @@
+From 536ecef2677a475fdc799817338876ce523b4be8 Mon Sep 17 00:00:00 2001
+From: "kalyan.kondapally@intel.com" <kalyan.kondapally@intel.com>
+Date: Fri, 4 Oct 2013 01:36:01 +0000
+Subject: [PATCH 4/4] Backport Chromium commit fe7d239 (r226925).
+
+    Add support for over-riding config attribute values.
+
+    GLSurfaceEGL chooses a EGL frame buffer configuration that match
+    attributes specified in attrib list. This CL adds support for Ozone
+    implementations to provide values for these attributes as supported
+    by the underlying window system.
+
+    BUG=
+
+    Review URL: https://codereview.chromium.org/23850008
+---
+ AUTHORS                               |    1 +
+ ui/gfx/ozone/surface_factory_ozone.cc |    5 +++++
+ ui/gfx/ozone/surface_factory_ozone.h  |    7 +++++++
+ ui/gl/gl_surface_egl.cc               |   11 +++++++++--
+ 4 files changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index a7cc2ae..cf9bb68 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -129,6 +129,7 @@ Joshua Roesslein <jroesslein@gmail.com>
+ Josué Ratelle <jorat1346@gmail.com>
+ Jun Jiang <jun.a.jiang@intel.com>
+ Junmin Zhu <junmin.zhu@intel.com>
++Kalyan Kondapally <kalyan.kondapally@intel.com>
+ Kamil Jiwa <kamil.jiwa@gmail.com>
+ Kangil Han <kangil.han@samsung.com>
+ Kangyuan Shu <kangyuan.shu@intel.com>
+diff --git a/ui/gfx/ozone/surface_factory_ozone.cc b/ui/gfx/ozone/surface_factory_ozone.cc
+index 9be61f4..ca67228 100644
+--- a/ui/gfx/ozone/surface_factory_ozone.cc
++++ b/ui/gfx/ozone/surface_factory_ozone.cc
+@@ -69,6 +69,11 @@ bool SurfaceFactoryOzone::SchedulePageFlip(gfx::AcceleratedWidget) {
+   return true;
+ }
+ 
++const int32* SurfaceFactoryOzone::GetEGLSurfaceProperties(
++    const int32* desired_attributes) {
++  return desired_attributes;
++}
++
+ // static
+ SurfaceFactoryOzone* SurfaceFactoryOzone::CreateTestHelper() {
+   return new SurfaceFactoryOzoneStub;
+diff --git a/ui/gfx/ozone/surface_factory_ozone.h b/ui/gfx/ozone/surface_factory_ozone.h
+index 9c5eac2..734c144 100644
+--- a/ui/gfx/ozone/surface_factory_ozone.h
++++ b/ui/gfx/ozone/surface_factory_ozone.h
+@@ -82,6 +82,13 @@ class GFX_EXPORT SurfaceFactoryOzone {
+   // in InitializeHardware. Returns NULL on error.
+   virtual gfx::VSyncProvider* GetVSyncProvider(gfx::AcceleratedWidget w) = 0;
+ 
++  // Returns an array of EGL properties, which can be used in any EGL function
++  // used to select a display configuration. Note that all properties should be
++  // immediately followed by the corresponding desired value and array should be
++  // terminated with EGL_NONE. Ownership of the array is not transferred to
++  // caller. desired_list contains list of desired EGL properties and values.
++  virtual const int32* GetEGLSurfaceProperties(const int32* desired_list);
++
+   // Create a default SufaceFactoryOzone implementation useful for tests.
+   static SurfaceFactoryOzone* CreateTestHelper();
+ 
+diff --git a/ui/gl/gl_surface_egl.cc b/ui/gl/gl_surface_egl.cc
+index 9e4da34..1bc3e48 100644
+--- a/ui/gl/gl_surface_egl.cc
++++ b/ui/gl/gl_surface_egl.cc
+@@ -144,9 +144,16 @@ bool GLSurfaceEGL::InitializeOneOff() {
+     EGL_NONE
+   };
+ 
++#if defined(USE_OZONE)
++  const EGLint* config_attribs =
++      surface_factory->GetEGLSurfaceProperties(kConfigAttribs);
++#else
++  const EGLint* config_attribs = kConfigAttribs;
++#endif
++
+   EGLint num_configs;
+   if (!eglChooseConfig(g_display,
+-                       kConfigAttribs,
++                       config_attribs,
+                        NULL,
+                        0,
+                        &num_configs)) {
+@@ -161,7 +168,7 @@ bool GLSurfaceEGL::InitializeOneOff() {
+   }
+ 
+   if (!eglChooseConfig(g_display,
+-                       kConfigAttribs,
++                       config_attribs,
+                        &g_config,
+                        1,
+                        &num_configs)) {
+-- 
+1.7.9.5
+
