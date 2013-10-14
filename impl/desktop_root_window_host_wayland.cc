@@ -17,7 +17,6 @@
 #include "ui/views/corewm/corewm_switches.h"
 #include "ui/views/corewm/cursor_manager.h"
 #include "ui/views/corewm/focus_controller.h"
-#include "ui/views/corewm/tooltip_aura.h"
 #include "ui/views/linux_ui/linux_ui.h"
 #include "ui/views/widget/desktop_aura/desktop_dispatcher_client.h"
 #include "ui/views/widget/desktop_aura/desktop_focus_rules.h"
@@ -168,8 +167,6 @@ void DesktopRootWindowHostWayland::InitFocus(aura::Window* window) {
 }
 
 scoped_ptr<views::corewm::Tooltip> DesktopRootWindowHostWayland::CreateTooltip() {
-  return scoped_ptr<corewm::Tooltip>(
-             new corewm::TooltipAura(gfx::SCREEN_TYPE_NATIVE));
 }
 
 void DesktopRootWindowHostWayland::Close() {
