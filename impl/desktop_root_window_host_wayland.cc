@@ -399,8 +399,7 @@ void DesktopRootWindowHostWayland::ClearNativeFocus() {
 
 Widget::MoveLoopResult DesktopRootWindowHostWayland::RunMoveLoop(
     const gfx::Vector2d& drag_offset,
-    Widget::MoveLoopSource source,
-    Widget::MoveLoopEscapeBehavior escape_behavior) {
+    Widget::MoveLoopSource source) {
   NOTIMPLEMENTED();
   return Widget::MOVE_LOOP_SUCCESSFUL;
 }
